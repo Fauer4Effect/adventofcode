@@ -21,7 +21,6 @@ def part1():
         if parent not in tree.keys():
             alone.add(parent)
     return alone
-        
 
 def part2():
     """
@@ -48,8 +47,11 @@ def part2():
             parent = entry[0].split(' ')[0].strip()
             children = map(str.strip, entry[1].split(','))
             tree[parent] = children
-    
+
     def get_weight(root):
+        """
+        recurssive helper function to determine which disks have bad stacks on them
+        """
         children = tree.get(root) or None
         if children is None:
             return ind_weights[root]
@@ -59,9 +61,6 @@ def part2():
                 print root, children_weights, tree[root]
             return ind_weights[root] + sum(children_weights)
     get_weight('hlhomy')
-        
-        
-
 
 if __name__ == "__main__":
     print "part1", part1()
