@@ -29,7 +29,7 @@ def part1():
             biggest -= 1
         rounds += 1
     return rounds
-   
+
 def part2():
     """
     anwer should be 1610

@@ -39,11 +39,13 @@ def part2():
             cur += length + skip
             skip += 1
 
+# dense_hash = [reduce(lambda a, b: a ^ b, sparse_hash[16*i:16*(i+1)]) for i in range(16)]
     dense_hash = []
     for i in range(16):
         block = reduce(lambda a, b: a ^ b, sparse_hash[16*i:16*(i+1)])
         dense_hash.append(block)
 
+# final = [format(chunk, "02x") for chunk in dense_hash]
     final = []
     for chunk in dense_hash:
         final.append(format(chunk, "02x"))
