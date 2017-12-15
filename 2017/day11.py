@@ -5,7 +5,7 @@ Python solution to advent of code day 11
 
 class Hexagon(object):
     """
-    A single hexagon
+    A single hexagon at a point on a hexagonal tiling
 
     Attributes:
         x, y, z describe our location
@@ -87,7 +87,7 @@ def part1():
 
 def part2():
     """
-    answer should be
+    answer should be 1461
     """
     with open("11_1_in.txt", "r") as my_input:
         commands = my_input.read().strip().split(',')
