@@ -67,5 +67,5 @@ def part2():
     return matches
 
 if __name__ == "__main__":
-    # print "part1", part1()
+    print "part1", part1()
     print "part2", part2()
