@@ -20,7 +20,8 @@ def part2():
     """
     this time we need to go through 50 million iterations
     obviously this will be too big for our memory, so we should figure out some sort of generator
-    answer should be
+    
+    answer should be 1930815
     """
     def spinlock():
         steps = 304
