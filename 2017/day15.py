@@ -44,38 +44,28 @@ def part2():
     """
     answer should be 313
     """
-    def genA(num):
-        """
-        generator for a
-        """
-        count = 0
+    def genA():
         valA = 699
-        while count < num:
+        while True:
             valA = (valA * 16807) % 2147483647
-            while valA % 4 != 0:
-                valA = (valA * 16807) % 2147483647
-            count += 1
-            yield valA
-    def genB(num):
-        """
-        generator for b
-        """
-        count = 0
+            if valA % 4 == 0:
+                yield valA
+    def genB():
         valB = 124
-        while count  < num:
+        while True:
             valB = (valB * 48271) % 2147483647
-            while valB % 8 != 0:
-                valB = (valB * 48271) % 2147483647    
-            count += 1
-            yield valB
-    gen_a = genA(5000000)
-    gen_b = genB(5000000)
+            if valB % 8 == 0:
+                yield valB
     matches = 0
-    for (a, b) in itertools.izip(gen_a, gen_b):
-        if bin(a)[-16:] == bin(b)[-16:]:
+    gen_a = genA()
+    gen_b = genB()
+    for _ in xrange(5000000):
+        a = gen_a.next()
+        b = gen_b.next()
+        if a & 0xFFFF == b & 0xFFFF:
             matches += 1
     return matches
 
 if __name__ == "__main__":
-    print "part1", part1()
+    # print "part1", part1()
     print "part2", part2()
