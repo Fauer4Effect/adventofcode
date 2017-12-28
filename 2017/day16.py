@@ -18,10 +18,7 @@ def part1(programs):
             second = int(command[1])
             if second < first:
                 first, second = second, first
-            if second < 16:
-                programs = programs[:first] + programs[second] + programs[first+1:second] + programs[first] + programs[second+1:]
-            else:
-                programs = programs[:first] + programs[second] + programs[first+1:second] + programs[first]
+            programs = programs[:first] + programs[second] + programs[first+1:second] + programs[first] + programs[second+1:]
         elif 'p' in command:
             command = command.split('/')
             first = command[0][1]
@@ -30,10 +27,7 @@ def part1(programs):
             second_ind = programs.index(second)
             if second_ind < first_ind:
                 first_ind, second_ind = second_ind, first_ind
-            if second_ind < 16:
-                programs = programs[:first_ind] + programs[second_ind] + programs[first_ind+1:second_ind] + programs[first_ind] + programs[second_ind+1:]
-            else:
-                programs = programs[:first_ind] + programs[second_ind] + programs[first_ind+1:second_ind] + programs[first_ind]
+            programs = programs[:first_ind] + programs[second_ind] + programs[first_ind+1:second_ind] + programs[first_ind] + programs[second_ind+1:]
     return programs
 
 def part2():
