@@ -4,6 +4,7 @@ Python solution to advent of code day 21
 """
 
 import numpy as np
+import itertools
 
 def build_np_array(s):
     """
@@ -20,14 +21,14 @@ def enlarge(grid, rules):
     """
     size = len(grid)
     by = 2 if size % 2 == 0 else 3
-    resize = lambda x: x * (by+1) // by
-    new_size = resize(size)
+    # lambda function to find what the new size should be
+    new_size = (lambda x: x * (by+1) // by)(size)
     solution = np.empty((new_size, new_size), dtype=bool)
     squares = range(0, size, by)
     new_squares = range(0, new_size, by+1)
 
-    for i, next_i in zip(squares, new_squares):
-        for j, next_j in zip(squares, new_squares):
+    for i, next_i in itertools.izip(squares, new_squares):
+        for j, next_j in itertools.izip(squares, new_squares):
             square = grid[i:i+by, j:j+by]
             enhanced = rules[square.tobytes()]
             solution[next_i:next_i+by+1, next_j:next_j+by+1] = enhanced
