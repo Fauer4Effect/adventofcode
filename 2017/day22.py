@@ -20,16 +20,15 @@ def part1():
                 grid[(i, j)] = 0
     cur_x = 0
     cur_y = 0
+    facing = 'n'
     caused_infection = 0
-    for _ in xrange(70):
+    for _ in xrange(7):
         if (cur_x, cur_y) in grid.keys():
             infected = grid[(cur_x, cur_y)]
         else:
             grid[(cur_x, cur_y)] = 0
             infected = 0
-        facing = 'n'
         if infected:
-            print "infected"
             grid[(cur_x, cur_y)] = 0
             if facing == 'n':
                 facing = 'e'
