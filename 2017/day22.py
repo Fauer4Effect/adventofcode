@@ -14,7 +14,10 @@ def part1():
     grid = {}
     for i in xrange(num_rows, abs(num_rows)+1):
         for j in xrange(num_cols, abs(num_cols)+1):
-            grid[(i, j)] = graph[i+num_rows-1][j+num_cols-1]
+            if graph[i+num_rows-1][j+num_cols-1] == '#':
+                grid[(i, j)] = 1
+            elif graph[i+num_rows-1][j+num_cols-1] == '.':
+                grid[(i, j)] = 0
     cur_x = 0
     cur_y = 0
     caused_infection = 0
@@ -26,6 +29,7 @@ def part1():
             infected = 0
         facing = 'n'
         if infected:
+            print "infected"
             grid[(cur_x, cur_y)] = 0
             if facing == 'n':
                 facing = 'e'
