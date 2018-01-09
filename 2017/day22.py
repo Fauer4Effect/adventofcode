@@ -2,29 +2,31 @@
 Author: Kyle Fauerbach
 Python solution to advent of code day 22
 """
-def part1():
+def gen_graph():
     """
-    answer should be
+    returns a dictionary keys are tuple of x,y coord and value is 0 in clean
+        1 if infected
     """
     with open("22_1_in.txt", "r") as my_input:
         graph = map(list, map(str.strip, my_input.readlines()))
-    graph = [['.','.','#'], ['#','.','.'], ['.','.','.']]
     range_y = 0 - int((len(graph)-1)/2)
     range_x = 0 - int((len(graph[0])-1)/2)
     grid = {}
     for i in xrange(abs(range_y), range_y-1, -1):
-        if i == 0:
-            new_i = i + abs(range_y)
-        elif i > 0:
-            new_i = i - abs(range_y)
-        else:
-            new_i = i
+        new_i = abs(range_y) - i
         for j in xrange(range_x, abs(range_x)+1):
             new_j = j + abs(range_x)
             if graph[new_i][new_j] == '#':
-                grid[(j, i)] = 1
+                grid[(j, i)] = 'i'
             else:
-                grid[(j, i)] = 0
+                grid[(j, i)] = 'c'
+    return grid
+
+def part1():
+    """
+    answer should be 5570
+    """
+    grid = gen_graph()
     cur_x = 0
     cur_y = 0
     facing = 'n'
@@ -33,10 +35,10 @@ def part1():
         if (cur_x, cur_y) in grid.keys():
             infected = grid[(cur_x, cur_y)]
         else:
-            grid[(cur_x, cur_y)] = 0
-            infected = 0
-        if infected:
-            grid[(cur_x, cur_y)] = 0
+            grid[(cur_x, cur_y)] = 'c'
+            infected = 'c'
+        if infected == 'i':
+            grid[(cur_x, cur_y)] = 'c'
             if facing == 'n':
                 facing = 'e'
             elif facing == 'e':
@@ -46,7 +48,7 @@ def part1():
             else:
                 facing = 'n'
         else:
-            grid[(cur_x, cur_y)] = 1
+            grid[(cur_x, cur_y)] = 'i'
             caused_infection += 1
             if facing == 'n':
                 facing = 'w'
