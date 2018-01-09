@@ -9,20 +9,27 @@ def part1():
     with open("22_1_in.txt", "r") as my_input:
         graph = map(list, map(str.strip, my_input.readlines()))
     graph = [['.','.','#'], ['#','.','.'], ['.','.','.']]
-    num_rows = 0 - int((len(graph)-1)/2)
-    num_cols = 0 - int((len(graph[0])-1)/2)
+    range_y = 0 - int((len(graph)-1)/2)
+    range_x = 0 - int((len(graph[0])-1)/2)
     grid = {}
-    for i in xrange(num_rows, abs(num_rows)+1):
-        for j in xrange(num_cols, abs(num_cols)+1):
-            if graph[i+num_rows-1][j+num_cols-1] == '#':
-                grid[(i, j)] = 1
-            elif graph[i+num_rows-1][j+num_cols-1] == '.':
-                grid[(i, j)] = 0
+    for i in xrange(abs(range_y), range_y-1, -1):
+        if i == 0:
+            new_i = i + abs(range_y)
+        elif i > 0:
+            new_i = i - abs(range_y)
+        else:
+            new_i = i
+        for j in xrange(range_x, abs(range_x)+1):
+            new_j = j + abs(range_x)
+            if graph[new_i][new_j] == '#':
+                grid[(j, i)] = 1
+            else:
+                grid[(j, i)] = 0
     cur_x = 0
     cur_y = 0
     facing = 'n'
     caused_infection = 0
-    for _ in xrange(7):
+    for _ in xrange(10000):
         if (cur_x, cur_y) in grid.keys():
             infected = grid[(cur_x, cur_y)]
         else:
