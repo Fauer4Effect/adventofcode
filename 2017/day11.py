@@ -15,7 +15,7 @@ class Hexagon(object):
         Based on its movement in one of the 6 possible directions
         in the hexagonal tiling
     """
-    def __init__(self, x = 0, y = 0, z = 0):
+    def __init__(self, x=0, y=0, z=0):
         self.x = x
         self.y = y
         self.z = z
@@ -63,7 +63,7 @@ def part1():
         s   --> (0, -1, 1)
         sw  --> (-1, 0, 1)
         nw  --> (-1, 1, 0)
-    
+
     answer should be 696
     """
     with open("11_1_in.txt", "r") as my_input:
