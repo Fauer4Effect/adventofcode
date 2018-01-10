@@ -15,7 +15,8 @@ def gen_graph():
     range_y = 0 - int((len(graph)-1)/2)
     range_x = 0 - int((len(graph[0])-1)/2)
     # the defaultdict from collections is much faster than the normal python dict
-    grid = defaultdict()
+    # grid = defaultdict()
+    grid = defaultdict(lambda: "c")
     for i in xrange(abs(range_y), range_y-1, -1):
         new_i = abs(range_y) - i
         for j in xrange(range_x, abs(range_x)+1):
@@ -89,11 +90,10 @@ def part2():
     facing = 'n'
     caused_infection = 0
     for _ in xrange(10000000):
-        if (cur_x, cur_y) in grid:
-            infected = grid[(cur_x, cur_y)]
-        else:
-            grid[(cur_x, cur_y)] = 'c'
-            infected = 'c'
+        # the other option we have because we are using defaultdict
+        # is that we can specify the lambda in the dict creation that
+        # will tell it what to return when the key is not already in the dict
+        infected = grid[(cur_x, cur_y)]
         if infected == 'i':
             grid[(cur_x, cur_y)] = 'f'
             if facing == 'n':
