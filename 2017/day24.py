@@ -17,30 +17,28 @@ def part1():
         pipes[pipe1[0]].append(pipe)
         pipes[pipe1[1]] .append(pipe)
     explore = deque()
-    used = set()
     need = '0'
     explore.extend(pipes[need])
     paths = []
     path = []
+    used = set()
     while explore:
         cur_pipe = explore.pop()
         if cur_pipe not in used:
             print path
             pipe1 = cur_pipe.split('/')
             if pipe1[0] == '0' or pipe1[1] == '0':
-                used = set()
                 need = '0'
                 path = []
+                used = set()
             if pipe1[0] == need:
                 need = pipe1[1]
             elif pipe1[1] == need:
                 need = pipe1[0]
-            else:
-                need = pipe1[0]
             explore.extend(pipes[need])
-            used.add(cur_pipe)
             path.append(cur_pipe)
             paths.append(path)
+            used.update(path)
 
 if __name__ == "__main__":
     print "part1", part1()
