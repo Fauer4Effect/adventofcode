@@ -4,7 +4,8 @@ Python solution to advent of code day 24
 """
 def solve():
     """
-    answer should be
+    answer should be 1868 for part1
+    answer should be 1841 for part2
     """
     with open("24_1_in.txt", "r") as my_input:
         all_pipes = [map(int, line.strip().split('/')) for line in my_input]
