@@ -7,7 +7,7 @@ from collections import defaultdict
 
 def part1():
     """
-    answer should be
+    answer should be 4387
     """
     tape = defaultdict(int)
     state = 'a'
