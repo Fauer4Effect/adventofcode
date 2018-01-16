@@ -2,9 +2,6 @@
 Author: Kyle Fauerbach
 Python solution to advent of code day 24
 """
-
-from collections import defaultdict, deque
-
 def solve():
     """
     answer should be
