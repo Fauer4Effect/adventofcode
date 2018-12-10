@@ -1,6 +1,6 @@
 """
 Author: Kyle Fauerbach
-Python solution to advent of code day 1
+Python solution to advent of code day 2
 """
 
 def part1():
@@ -21,10 +21,13 @@ def part1():
 
 def differences(s1, s2):
     diff = 0
+    same = ''
     for i in range(len(s1)):
         if s1[i] != s2[i]:
             diff += 1
-    return diff
+        else:
+            same += s1[i]
+    return diff, same
 
 def part2():
     with open("2_1_in.txt", "r") as my_input:
@@ -33,12 +36,9 @@ def part2():
 
     for box1 in my_input:
         for box2 in my_input:
-            if differences(box1, box2) == 1:
-                ans = ''
-                for i in range(len(box1)):
-                    if box1[i] == box2[i]:
-                        ans += box1[i]
-                return ans
+            diffs, same = differences(box1, box2)
+            if diffs == 1:
+                return same
     return None
 
 if __name__ == "__main__":
