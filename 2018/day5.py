@@ -3,8 +3,6 @@ Author: Kyle Fauerbach
 Python solution to advent of code day 5
 """
 
-import itertools as it
-
 def are_opposites(a, b):
     return (a.lower() == b.lower() and
             ((a.isupper() and b.islower()) or
