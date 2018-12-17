@@ -5,7 +5,6 @@ Python solution to advent of code day 11
 
 import numpy as np
 from scipy import signal
-import operator
 
 def get_power(x, y, serial):
     rack_id = x+10
