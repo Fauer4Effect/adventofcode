@@ -3,7 +3,6 @@ Author: Kyle Fauerbach
 Python solution to advent of code day 13
 """
 
-from collections import deque
 from operator import attrgetter
 
 class Cart(object):
