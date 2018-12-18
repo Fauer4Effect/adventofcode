@@ -8,143 +8,110 @@ from operator import attrgetter
 
 class Cart(object):
     """
-    an object
+    cart object
     Attributes:
-        none
+        x, y: coordinates on the grid
+        dx, dy: "velocity" for movement on the grid
+        count: how many intersections hit
+        turns: swap velocity when we turn at intersections
+        curves: how to scale velocity when we need to turn
     Methods:
-        none
+        move(grid): make the move based on the point on the grid. Also update velocity if needed
     """
-    def __init__(self, pos_x, pos_y, orientation):
-        self.pos_x = pos_x
-        self.pos_y = pos_y
-        self.orientation = orientation
-        self.intersection = self.do_intersection()
+    def __init__(self, position, displacement, count=0):
+        self.x = position[0]
+        self.y = position[1]
+        self.dx = displacement[0]
+        self.dy = displacement[1]
+        self.count = count
+        self.turns = [lambda d: (d[1], -d[0]), lambda d: d, lambda d: (-d[1], d[0])]
+        self.curves = {'\\': 1, '/': -1}
 
-    def do_intersection(self):
-        """
-        Generator to move through the intersection
-        """
-        count = 0
-        while 1:
-            if count % 3 == 0:
-                # left
-                if self.orientation == 'N':
-                    self.orientation = 'W'
-                elif self.orientation == 'E':
-                    self.orientation = 'N'
-                elif self.orientation == 'S':
-                    self.orientation = 'E'
-                elif self.orientation == 'W':
-                    self.orientation = 'S'
-            elif count % 3 == 1:
-                # straight
-                yield self.orientation
-            elif count % 3 == 2:
-                # right
-                if self.orientation == 'N':
-                    self.orientation = 'E'
-                elif self.orientation == 'E':
-                    self.orientation = 'S'
-                elif self.orientation == 'S':
-                    self.orientation = 'W'
-                elif self.orientation == 'W':
-                    self.orientation = 'N'
-            count += 1
+    def __repr__(self):
+        return "({}, {})".format(self.x, self.y)
 
-    def move(self, cur_piece):
-        # check if you need to update the orientation
-        if cur_piece == '+':
-            self.orientation = next(self.intersection)
-        elif cur_piece == '\\':
-            if self.orientation == 'N':
-                self.orientation = 'W'
-            elif self.orientation == 'E':
-                self.orientation = 'S'
-            elif self.orientation == 'S':
-                self.orientation = 'E'
-            elif self.orientation == 'W':
-                self.orientation = 'N'
-        elif cur_piece == '/':
-            if self.orientation == 'N':
-                self.orientation = 'E'
-            elif self.orientation == 'E':
-                self.orientation = 'N'
-            elif self.orientation == 'S':
-                self.orientation = 'W'
-            elif self.orientation == 'W':
-                self.orientation = 'S'
+    def move(self, grid):
+        self.x += self.dx
+        self.y += self.dy
+        new_spot = grid[self.y][self.x]
 
-        # do the move
-        if self.orientation == 'N':
-            self.pos_y -= 1
-        elif self.orientation == 'S':
-            self.pos_y += 1
-        elif self.orientation == 'W':
-            self.pos_x -= 1
-        elif self.orientation == 'E':
-            self.pos_x += 1
+        if new_spot == '+':
+            self.dx, self.dy = self.turns[self.count % 3]((self.dx, self.dy))
+            self.count += 1
+        if new_spot in self.curves:
+            factor = self.curves[new_spot]
+            self.dx, self.dy = (self.dy * factor, self.dx * factor)
 
-def check_collisions(carts):
-    positions = set()
-    for cart in carts:
-        pos = (cart.pos_x, cart.pos_y)
-        if pos in positions:
-            return pos
-        positions.add(pos)
-    return None
 
 def part1():
-    """
-    we could try to keep a 2d array of the map and then have cart objects that we will store
-    for position and shit
-    As far as moving we could keep a queue of the carts sorted by their position
-    then we could do tick for each in order to do the move and then check collision every time?
-    """
+    with open('13_1_in.txt') as my_input:
+        grid = [list(l) for l in my_input.read().split('\n')]
 
-    with open("13_1_in.txt", "r") as my_input:
-        my_input = my_input.readlines()
-    grid = [list(line.strip()) for line in my_input]
+    moves = {'^': (0, -1), '>': (1,  0), 'v': (0,  1), '<': (-1,  0)}
+    cart_syms = list(moves.keys())
 
-    carts = deque()
-    num_carts = 0
+    carts = []
+
     for y in range(len(grid)):
         for x in range(len(grid[y])):
-            if grid[y][x] == '^':
-                carts.append(Cart(x, y, 'N'))
-                num_carts += 1
-                grid[y][x] = '|'
-            elif grid[y][x] == '<':
-                carts.append(Cart(x, y, 'W'))
-                num_carts += 1
-                grid[y][x] = '-'
-            elif grid[y][x] == '>':
-                carts.append(Cart(x, y, 'E'))
-                num_carts += 1
-                grid[y][x] = '-'
-            elif grid[y][x] == 'v':
-                carts.append(Cart(x, y, 'S'))
-                num_carts += 1
-                grid[y][x] = '|'
+            cur = grid[y][x]
+            if cur in cart_syms:
+                carts.append(Cart([x, y], moves[cur], 0))
+                grid[y][x] = '-' if cur in ['<', '>'] else '|'
 
-    collided = check_collisions(carts)
-    # while not collided:
-    for _ in range(20):
-        carts = deque(sorted(carts, key=attrgetter('pos_y', 'pos_x')))
-        for _ in range(num_carts):
-            cart = carts.popleft()
-            cart.move(grid[cart.pos_y][cart.pos_x])
-            carts.append(cart)
-        collided = check_collisions(carts)
-        for cart in carts:
-            print(cart.pos_y, cart.pos_x)
-        print("-"*20)
+    while 1:
+        carts = sorted(carts, key=attrgetter('y', 'x'))
 
-
-    return collided
+        for i, cart in enumerate(carts):
+            cart.move(grid)
+            pos = (cart.x, cart.y)
+            # Check if we have collided
+            for j in range(len(carts)):
+                # don't check self
+                if j == i:
+                    continue
+                cart2 = carts[j]
+                if (cart2.x, cart2.y) == pos:
+                    return pos
+    return None
 
 def part2():
+    with open('13_1_in.txt') as my_input:
+        grid = [list(l) for l in my_input.read().split('\n')]
 
-    return None
+    moves = {'^': (0, -1), '>': (1,  0), 'v': (0,  1), '<': (-1,  0)}
+    cart_syms = list(moves.keys())
+
+    carts = []
+
+    for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            cur = grid[y][x]
+            if cur in cart_syms:
+                carts.append(Cart([x, y], moves[cur], 0))
+                grid[y][x] = '-' if cur in ['<', '>'] else '|'
+
+    while len(carts) > 1:
+        carts = sorted(carts, key=attrgetter('y', 'x'))
+        collisions = []
+
+        for i, cart in enumerate(carts):
+            if cart in collisions:
+                continue
+            cart.move(grid)
+            pos = (cart.x, cart.y)
+            for j in range(len(carts)):
+                if j == i:
+                    continue
+                cart2 = carts[j]
+                if (cart2.x, cart2.y) == pos:
+                    collisions.append(cart)
+                    collisions.append(cart2)
+
+        carts = [c for c in carts if c not in collisions]
+
+    return carts[0]
+
 
 if __name__ == "__main__":
     print(part1())
