@@ -6,12 +6,12 @@ Python solution to advent of code day 15
 from operator import attrgetter
 
 class Fighter(object):
-    def __init__(self, location, type):
+    def __init__(self, location, type, pp=3, hp=200):
         self.x = location[0]
         self.y = location[1]
         self.type = type
-        self.hp = 200
-        self.pp = 3
+        self.pp = pp
+        self.hp = hp
         self.is_alive = True
 
     def __repr__(self):
@@ -70,14 +70,13 @@ class Fighter(object):
                 prev[(x, y)] = None
                 Q.add((x, y))
         dist[current] = 0
+        Q.add(current)
         while Q:
-            min_dist = 1000000
-            u = None
-            for point in Q:
-                if dist[point] <= min_dist:
-                    min_dist = dist[point]
+            sorted_dists = sorted(dist, key=dist.get)
+            for point in sorted_dists:
+                if point in Q:
                     u = point
-            # u = min(dist, key=dist.get)
+                    break
             Q.remove(u)
             if u == goal:
                 return dist[u]
@@ -100,10 +99,13 @@ class Fighter(object):
         for point in open:
             distances[point] = self.dijkstra((self.x, self.y), point, grid)
         # sort those reachable ones by distance and then reading order
-        chosen = min(distances, key=distances.get)
+        chosen = sorted(distances.items(), key=lambda kv: (kv[1], kv[0][1], kv[0][0]))[0][0]
+        if distances[chosen] == 1000000:
+            return
+
         # for the chosen square pick which adjacent square to go to by distance
         # from that new square to the chosen and reading order
-        x, y = chosen
+        x, y = self.x, self.y
         search = [(x, y-1), (x, y+1), (x-1, y), (x+1, y)]
         search = [(x2, y2) for x2, y2 in search if 0<=x2<len(grid[y2]) and 0<=y2<len(grid)]
         neighbors = [(x2, y2) for x2, y2 in search if grid[y2][x2] == '.']
@@ -111,13 +113,13 @@ class Fighter(object):
             return
         distances = {}
         for point in neighbors:
-            distances[point] = self.dijkstra((self.x, self.y), point, grid)
-        goto = min(distances, key=distances.get)
+            distances[point] = self.dijkstra(point, chosen, grid)
+        goto = sorted(distances.items(), key=lambda kv: (kv[1], kv[0][1], kv[0][0]))[0][0]
+
         # move to that square
         grid[self.y][self.x] = '.'
         self.x, self.y = goto
         grid[self.y][self.x] = self
-        print("MOVED", self.x, self.y)
         return
 
     def do_turn(self, grid):
@@ -164,37 +166,29 @@ def part1():
                 new_fighter = Fighter((x, y), 'G')
                 grid[y][x] = new_fighter
                 fighters.append(new_fighter)
-
-    # FIXME something is wrong with the way that they move
-    # one guy doesn't move when he should
-    # the other guy just goes back and forth instead of staying where he is
-    # so one guy moves from 3,1 to 2,2 and the other 3,3 to 3,1 none of which are valid
     rounds = 0
-    # while 1:
-    for _ in range(2):
+    while 1:
         done = False
         # fighters take turns in reading order
         fighters = sorted(fighters, key=attrgetter('y', 'x'))
         for fighter in fighters:
-            print(fighter.x, fighter.y)
-            done = fighter.do_turn(grid)
+            if fighter.is_alive:
+                done = fighter.do_turn(grid)
             if done:
                 break
 
-        for i in range(len(grid)):
-            print(''.join(map(str, grid[i])))
-        for fighter in fighters:
-            print(fighter, fighter.hp)
-        print("-"*50)
-
+        fighters = [fighter for fighter in fighters if fighter.is_alive]
         if done:
             break
         rounds += 1
 
-    return rounds
+    score = 0
+    for fighter in fighters:
+        score += fighter.hp
+
+    return fighters[0].type, rounds * score
 
 def part2():
-
     return None
 
 if __name__ == "__main__":
