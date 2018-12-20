@@ -4,6 +4,7 @@ Python solution to advent of code day 15
 """
 
 from operator import attrgetter
+from collections import deque
 
 class Fighter(object):
     def __init__(self, location, type, pp=3, hp=200):
@@ -41,11 +42,12 @@ class Fighter(object):
         """
         Find open squares that are adjacent to an enemy location
         """
+        height = len(grid)
+        width = len(grid[0])
         x, y = location
         search = [(x, y-1), (x, y+1), (x-1, y), (x+1, y)]
-        search = [(x2, y2) for x2, y2 in search if 0<=x2<len(grid[y2]) and 0<=y2<len(grid)]
-        open = [(x2, y2) for x2, y2 in search if grid[y2][x2] == '.']
-        return open
+        search = [(x2, y2) for x2, y2 in search if 0<=x2<width and 0<=y2<height and grid[y2][x2] == '.']
+        return search
 
     def got_attacked(self, attacker_pp):
         self.hp -= attacker_pp
@@ -58,46 +60,30 @@ class Fighter(object):
         chosen = in_range[0]
         chosen.got_attacked(self.pp)
 
-    def dijkstra(self, current, goal, grid):
-        Q = set()
-        dist = {}
-        prev = {}
-        for y in range(len(grid)):
-            for x in range(len(grid[y])):
-                if grid[y][x] != '.':
-                    continue
-                dist[(x, y)] = 1000000
-                prev[(x, y)] = None
-                Q.add((x, y))
-        dist[current] = 0
-        Q.add(current)
-        while Q:
-            sorted_dists = sorted(dist, key=dist.get)
-            for point in sorted_dists:
-                if point in Q:
-                    u = point
-                    break
-            Q.remove(u)
-            if u == goal:
-                return dist[u]
-            # get neighbors of u
-            x, y = u
-            search = [(x, y-1), (x, y+1), (x-1, y), (x+1, y)]
-            search = [(x2, y2) for x2, y2 in search if (0<=y2<len(grid) and 0<=x2<len(grid[y2]))]
-            neighbors = [(x2, y2) for x2, y2 in search if grid[y2][x2] == '.']
-            for v in neighbors:
-                # distance to any neighbor should just be 1
-                alt = dist[u]+1
-                if alt < dist[v]:
-                    dist[v] = alt
-                    prev[v] = u
+    def bfs(self, current, goal, grid):
+        height = len(grid)
+        width = len(grid[0])
+        queue = deque([[current]])
+        seen = set([current])
+        while queue:
+            path = queue.popleft()
+            x, y = path[-1]
+            if (x, y) == goal:
+                return len(path)
+            for x2, y2 in ((x+1,y), (x-1,y), (x,y+1), (x,y-1)):
+                if 0<=x2<width and 0<=y2<height and grid[y2][x2] == '.' and (x2, y2) not in seen:
+                    queue.append(path+[(x2,y2)])
+                    seen.add((x2,y2))
         return 1000000
 
+
     def move(self, open, grid):
+        height = len(grid)
+        width = len(grid[0])
         # Find which squares are reachable
         distances = {}
         for point in open:
-            distances[point] = self.dijkstra((self.x, self.y), point, grid)
+            distances[point] = self.bfs((self.x, self.y), point, grid)
         # sort those reachable ones by distance and then reading order
         chosen = sorted(distances.items(), key=lambda kv: (kv[1], kv[0][1], kv[0][0]))[0][0]
         if distances[chosen] == 1000000:
@@ -107,13 +93,12 @@ class Fighter(object):
         # from that new square to the chosen and reading order
         x, y = self.x, self.y
         search = [(x, y-1), (x, y+1), (x-1, y), (x+1, y)]
-        search = [(x2, y2) for x2, y2 in search if 0<=x2<len(grid[y2]) and 0<=y2<len(grid)]
-        neighbors = [(x2, y2) for x2, y2 in search if grid[y2][x2] == '.']
-        if not neighbors:
+        search = [(x2, y2) for x2, y2 in search if 0<=x2<width and 0<=y2<height and grid[y2][x2] == '.']
+        if not search:
             return
         distances = {}
-        for point in neighbors:
-            distances[point] = self.dijkstra(point, chosen, grid)
+        for point in search:
+            distances[point] = self.bfs(point, chosen, grid)
         goto = sorted(distances.items(), key=lambda kv: (kv[1], kv[0][1], kv[0][0]))[0][0]
 
         # move to that square
@@ -152,14 +137,14 @@ class Fighter(object):
         return False
 
 
-def part1():
+def play_game(part2, elf_attack_power=3):
     with open("15_1_in.txt", "r") as my_input:
         grid = [list(x.replace('\n', '')) for x in my_input.readlines()]
     fighters = []
     for y in range(len(grid)):
         for x in range(len(grid[y])):
             if grid[y][x] == 'E':
-                new_fighter = Fighter((x, y), 'E')
+                new_fighter = Fighter((x, y), 'E', elf_attack_power)
                 grid[y][x] = new_fighter
                 fighters.append(new_fighter)
             elif grid[y][x] == 'G':
@@ -167,6 +152,7 @@ def part1():
                 grid[y][x] = new_fighter
                 fighters.append(new_fighter)
     rounds = 0
+    elf_died = False
     while 1:
         done = False
         # fighters take turns in reading order
@@ -176,9 +162,15 @@ def part1():
                 done = fighter.do_turn(grid)
             if done:
                 break
+        for fighter in fighters:
+            if fighter.type == 'E' and not fighter.is_alive:
+                elf_died = True
+                break
 
         fighters = [fighter for fighter in fighters if fighter.is_alive]
         if done:
+            break
+        if part2 and elf_died:
             break
         rounds += 1
 
@@ -186,10 +178,23 @@ def part1():
     for fighter in fighters:
         score += fighter.hp
 
-    return fighters[0].type, rounds * score
+    return elf_died, fighters[0].type, rounds * score
+
+def part1():
+    elf_died, winner_type, score = play_game(False)
+
+    return score
 
 def part2():
-    return None
+
+    elf_attack_power = 4
+    while 1:
+        elf_died, winner_type, score = play_game(True, elf_attack_power)
+        if not elf_died:
+            break
+        elf_attack_power += 1
+
+    return elf_attack_power, score
 
 if __name__ == "__main__":
     print(part1())
