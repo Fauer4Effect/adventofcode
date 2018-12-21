@@ -181,7 +181,7 @@ def play_game(part2, elf_attack_power=3):
     return elf_died, fighters[0].type, rounds * score
 
 def part1():
-    elf_died, winner_type, score = play_game(False)
+    _, _, score = play_game(False)
 
     return score
 
@@ -189,7 +189,7 @@ def part2():
 
     elf_attack_power = 4
     while 1:
-        elf_died, winner_type, score = play_game(True, elf_attack_power)
+        elf_died, _, score = play_game(True, elf_attack_power)
         if not elf_died:
             break
         elf_attack_power += 1
