@@ -1,6 +1,6 @@
 """
 Author: Kyle Fauerbach
-Python solution to advent of code day 15
+Python solution to advent of code day 16
 """
 
 import re
