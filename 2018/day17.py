@@ -4,7 +4,6 @@ Python solution to advent of code day 17
 """
 
 from collections import defaultdict, deque
-import operator
 import re
 
 def supported(cur_pos, points):
