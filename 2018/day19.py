@@ -1,6 +1,6 @@
 """
 Author: Kyle Fauerbach
-Python solution to advent of code day 16
+Python solution to advent of code day 19
 """
 
 def addr(op, reg):
