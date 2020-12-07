@@ -6,14 +6,18 @@
 
 #include "../split.h"
 
+// typedef so we don't have to type so much
+typedef std::map<std::string, std::vector<std::pair<std::string, int>>>
+    bag_map_t;
+
 /**
  * @param part1 If true then we will create a map inner -> outer bags
  * If this is false then we will map outer -> inner
  */
-static std::map<std::string, std::vector<std::pair<std::string, int>>>
+static bag_map_t
 parse_input(bool part1)
 {
-    std::map<std::string, std::vector<std::pair<std::string, int>>> bags;
+    bag_map_t                bags;
     std::fstream             my_input{"input.txt"};
     std::string              line;
     std::string              outer_color;
@@ -50,7 +54,7 @@ parse_input(bool part1)
 static int
 part1(std::string my_bag)
 {
-    std::map<std::string, std::vector<std::pair<std::string, int>>> bags;
+    bag_map_t                bags;
     std::vector<std::string> to_explore{};
     std::string              cur;
     std::set<std::string>    explored{};
@@ -77,8 +81,7 @@ part1(std::string my_bag)
 }
 
 static long
-get_bags(std::map<std::string, std::vector<std::pair<std::string, int>>> &bags,
-         std::string                                                      bag)
+get_bags(bag_map_t &bags, std::string bag)
 {
     long total{1};
     for (auto i : bags[bag])
@@ -91,7 +94,7 @@ get_bags(std::map<std::string, std::vector<std::pair<std::string, int>>> &bags,
 static int
 part2(std::string my_bag)
 {
-    std::map<std::string, std::vector<std::pair<std::string, int>>> bags;
+    bag_map_t                                bags;
     std::vector<std::pair<std::string, int>> to_explore{};
     std::string                              cur;
     int                                      total{};
