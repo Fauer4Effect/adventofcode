@@ -1,7 +1,7 @@
 #include "../split.h"
+#include "robin_hood.h"
 #include <fstream>
 #include <iostream>
-#include <unordered_map>
 
 class Num
 {
@@ -17,12 +17,12 @@ class Num
 static long
 spoken_num(long index)
 {
-    std::fstream                  my_input{"input.txt"};
-    std::string                   line;
-    std::unordered_map<long, Num> spoken{};
-    std::vector<std::string>      starts;
-    long                          cur_turn{1};
-    long                          last_spoken{};
+    std::fstream                              my_input{"input.txt"};
+    std::string                               line;
+    robin_hood::unordered_flat_map<long, Num> spoken{};
+    std::vector<std::string>                  starts;
+    long                                      cur_turn{1};
+    long                                      last_spoken{};
 
     getline(my_input, line);
     starts = split(line, ",");
