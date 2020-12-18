@@ -5,7 +5,7 @@ TARGET = day16
 all: $(TARGET)
 
 $(TARGET): $(TARGET).cpp
-	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).cpp ../split.cpp
+	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).cpp
 
 clean:
 	$(RM) $(TARGET) 
