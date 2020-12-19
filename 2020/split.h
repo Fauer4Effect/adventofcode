@@ -9,18 +9,17 @@
  * @param sep The delimiter
  * @return std::vector<std::string> Vector of the parts of the split string.
  */
-std::vector<std::string> split(std::string str, std::string sep)
-{
-    // Cast to cstyle char* so we can use strtok
-    char *                   cstr = const_cast<char *>(str.c_str());
-    char *                   current;
-    std::vector<std::string> arr;
+std::vector<std::string> split (std::string s, std::string delimiter) {
+    size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+    std::string token;
+    std::vector<std::string> res;
 
-    current = strtok(cstr, sep.c_str());
-    while (NULL != current)
-    {
-        arr.push_back(current);
-        current = strtok(NULL, sep.c_str());
+    while ((pos_end = s.find (delimiter, pos_start)) != std::string::npos) {
+        token = s.substr (pos_start, pos_end - pos_start);
+        pos_start = pos_end + delim_len;
+        res.push_back (token);
     }
-    return arr;
+
+    res.push_back (s.substr (pos_start));
+    return res;
 }
