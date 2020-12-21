@@ -223,54 +223,155 @@ part1(const tile_matrix_t &matrix, std::size_t dimensions)
     return ans;
 }
 
-static std::uint64_t
-part2(tile_matrix_t &matrix, std::size_t dimensions)
+static int mark_monster(char_matrix_t &image, const std::vector<std::pair<int, int>> &monster_coords)
 {
-    // first we have to remove all the borders from the image
+    int monsters{};
+    int new_r;
+    int new_c;
+    bool has_monster;
 
-    // then we have to do all the transformations on the new
-    // image to see which one actually have the monsters in it
-
-    Tile *            t;
-    std::vector<char> row;
-    char_matrix_t     image{};
-    char_matrix_t     pixels;
-
-    for (auto r = 0; r < dimensions; r++)
+    for (auto r = 0; r < image.size(); r++)
     {
-        row = std::vector<char>();
-        for (auto c = 0; c < dimensions; c++)
+        for (auto c = 0; c < image[r].size(); c++)
         {
-            t      = matrix[r][c];
-            pixels = t->versions[t->matching_version];
-            for (auto r2 = 1; r2 < pixels.size() - 1; r2++)
+            has_monster = true;
+            for (auto [x, y] : monster_coords)
             {
-                for (auto c2 = 1; c2 < pixels.size() - 1; c2++)
+                new_r = r + x;
+                new_c = c + y;
+                if (new_r >= image.size() || new_c >= image[r].size())
                 {
-                    row.push_back(pixels[r2][c2]);
+                    has_monster = false;
+                    break;
+                }
+                if (image[new_r][new_c] != '#')
+                {
+                    has_monster = false;
+                    break;
+                }
+            }
+            if (has_monster)
+            {
+                monsters++;
+                for (auto [x, y] : monster_coords)
+                {
+                    new_r = r+x;
+                    new_c = c + y;
+                    image[new_r][new_c] = '0';
                 }
             }
         }
-        image.push_back(row);
     }
 
+    return monsters;
+}
+
+static std::uint64_t get_roughness(const char_matrix_t &image)
+{
+    std::uint64_t rough{};
     for (auto r : image)
     {
         for (auto c : r)
         {
-            std::cout << c << " ";
+            if ('#' == c)
+            {
+                rough++;
+            }
         }
-        std::cout << std::endl;
+    }
+    return rough;
+}
+
+static void print_image(char_matrix_t& image)
+{
+    for (auto r : image)
+    {
+        for (auto c : r)
+        {
+            std::cout << c;
+        }
+        std::cout << "\n";
+    }
+}
+
+static std::uint64_t
+part2(tile_matrix_t &matrix, std::size_t dimensions)
+{
+    char_matrix_t                    image{};
+    char_matrix_t                    pixels;
+    std::vector<std::pair<int, int>> monster_coords{
+        {0, 18}, {1, 0}, {1, 5}, {1, 6}, {1, 11}, {1, 12}, {1, 17}, {1, 18},
+        {1, 19}, {2, 1}, {2, 4}, {2, 7}, {2, 10}, {2, 13}, {2, 16}};
+    std::size_t width;
+    std::size_t len;
+    int new_r;
+    int new_c;
+    int num_monsters{};
+    int transformation{};
+    std::uint64_t roughness{};
+
+    // first we have to remove all the borders from the image
+    width = matrix.size() * (matrix[0][0]->contents.size() - 2);
+    for (auto r = 0; r < width; r++)
+    {
+        image.push_back(std::vector<char>(width, 0));
+    }
+    for (auto r = 0; r < matrix.size(); r++)
+    {
+        for (auto c = 0; c < matrix[0].size(); c++)
+        {
+            pixels = matrix[r][c]->versions[matrix[r][c]->matching_version];
+            len = pixels.size() - 2;
+            for (auto r2 = 1; r2 < pixels.size()-1; r2++)
+            {
+                for (auto c2=1; c2 < pixels.size()-1; c2++)
+                {
+                    new_r = r * len + r2 - 1;
+                    new_c = c * len + c2 - 1;
+                    image[new_r][new_c] = pixels[r2][c2];
+                }
+            }
+        }
     }
 
-    return 0;
+    // now we have to find the one orientation that actually has sea monsters
+    // then once we have that we can mark all the sea monsters
+    // and then we can count up what is left
+    while (!num_monsters)
+    {
+        num_monsters = mark_monster(image, monster_coords);
+        if (num_monsters)
+        {
+            roughness = get_roughness(image);
+            for (auto r : image)
+            {
+                for (auto c : r)
+                {
+                    std::cout << c;
+                }
+                std::cout << "\n";
+            }
+            break;
+        }
+        if (transformation < 4)
+        {
+            image = do_rotate(image);
+            transformation++;
+        }
+        else
+        {
+            transformation = 0;
+            image = do_flip(image);
+        }
+        
+    }
+    return roughness;
 }
 
 int
 main(int argc, char **argv)
 {
-    // int           dimensions{12};
-    int               dimensions{3};
+    int           dimensions{12};
     std::vector<Tile> tiles;
     tile_matrix_t     matrix{};
     matrix = resolve_matrix(tiles, matrix, dimensions);
