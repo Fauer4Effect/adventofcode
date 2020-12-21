@@ -1,3 +1,6 @@
+#ifndef ENUMERATE_H
+#define ENUMERATE_H
+
 #include <tuple>
 
 template <typename T,
@@ -21,3 +24,5 @@ constexpr auto enumerate(T && iterable)
     };
     return iterable_wrapper{ std::forward<T>(iterable) };
 }
+
+#endif // ENUMERATE_H
