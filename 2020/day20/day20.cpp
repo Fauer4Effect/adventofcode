@@ -10,7 +10,7 @@ using char_matrix_t = std::vector<std::vector<char>>;
 using tile_matrix_t = std::vector<std::vector<Tile *>>;
 
 static char_matrix_t
-do_rotate(char_matrix_t matrix)
+do_rotate(const char_matrix_t &matrix)
 {
     char_matrix_t out = matrix;
     for (auto r = 0; r < matrix.size(); r++)
@@ -26,7 +26,7 @@ do_rotate(char_matrix_t matrix)
 }
 
 static char_matrix_t
-do_flip(char_matrix_t matrix)
+do_flip(const char_matrix_t &matrix)
 {
     char_matrix_t out = matrix;
     for (auto r = 0; r < matrix.size(); r++)
@@ -67,7 +67,7 @@ class Tile
 };
 
 static bool
-check_left_fit(Tile l, Tile r)
+check_left_fit(const Tile &l, const Tile &r)
 {
     char_matrix_t lv  = l.versions[l.actual_version];
     char_matrix_t rv  = r.versions[r.actual_version];
@@ -83,7 +83,7 @@ check_left_fit(Tile l, Tile r)
 }
 
 static bool
-check_top_fit(Tile top, Tile bot)
+check_top_fit(const Tile &top, const Tile &bot)
 {
     char_matrix_t tv  = top.versions[top.actual_version];
     char_matrix_t bv  = bot.versions[bot.actual_version];
@@ -156,23 +156,24 @@ check_tile(std::vector<Tile> &tiles, std::unordered_set<int> &in_use,
                     return true;
                 }
             }
+            tile.actual_version = -1;
         }
         matrix[row][col] = nullptr;
         in_use.erase(tile.num);
     }
+
     return false;
 }
 
 static tile_matrix_t
-resolve_matrix(std::size_t dimensions)
+resolve_matrix(std::vector<Tile> &tiles, tile_matrix_t &matrix,
+               std::size_t dimensions)
 {
-    std::fstream                     my_input{"input.txt"};
-    std::string                      line;
-    std::vector<Tile>                tiles;
-    std::vector<Tile *>              row;
-    std::vector<std::vector<Tile *>> matrix;
-    std::unordered_set<int>          in_use;
-    Tile                             cur;
+    std::fstream            my_input{"input.txt"};
+    std::string             line;
+    std::vector<Tile *>     row;
+    std::unordered_set<int> in_use;
+    Tile                    cur;
 
     while (getline(my_input, line))
     {
@@ -210,7 +211,7 @@ resolve_matrix(std::size_t dimensions)
 }
 
 static std::uint64_t
-part1(tile_matrix_t &matrix, std::size_t dimensions)
+part1(const tile_matrix_t &matrix, std::size_t dimensions)
 {
     std::uint64_t ans{1};
 
@@ -227,24 +228,26 @@ part2(tile_matrix_t &matrix, std::size_t dimensions)
 {
     // first we have to remove all the borders from the image
 
-    // then we have to do all the transformations on the new 
+    // then we have to do all the transformations on the new
     // image to see which one actually have the monsters in it
 
-    Tile t;
+    Tile *            t;
     std::vector<char> row;
-    char_matrix_t image{};
+    char_matrix_t     image{};
+    char_matrix_t     pixels;
 
     for (auto r = 0; r < dimensions; r++)
     {
         row = std::vector<char>();
         for (auto c = 0; c < dimensions; c++)
         {
-            t = *matrix[r][c];
-            for (auto r2 = 1; r2 < t.contents.size()-2; r2++)
+            t      = matrix[r][c];
+            pixels = t->versions[t->matching_version];
+            for (auto r2 = 1; r2 < pixels.size() - 1; r2++)
             {
-                for (auto c2 = 1; c2 < t.contents[0].size()-2; c2++)
+                for (auto c2 = 1; c2 < pixels.size() - 1; c2++)
                 {
-                    row.push_back(t.contents[r2][c2]);
+                    row.push_back(pixels[r2][c2]);
                 }
             }
         }
@@ -266,9 +269,12 @@ part2(tile_matrix_t &matrix, std::size_t dimensions)
 int
 main(int argc, char **argv)
 {
-    int           dimensions{12};
-    tile_matrix_t matrix;
-    matrix = resolve_matrix(dimensions);
+    // int           dimensions{12};
+    int               dimensions{3};
+    std::vector<Tile> tiles;
+    tile_matrix_t     matrix{};
+    matrix = resolve_matrix(tiles, matrix, dimensions);
+
     std::cout << part1(matrix, dimensions) << "\n";
     std::cout << part2(matrix, dimensions) << std::endl;
 }
